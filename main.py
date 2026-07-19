@@ -1,19 +1,20 @@
 from scraper import get_news_list
+from parser import parse_article
 
 
 def main():
 
     news = get_news_list()
 
-    print(f"{len(news)}件取得しました")
+    for article in news[:5]:
 
-    print()
+        result = parse_article(article)
 
-    for article in news[:10]:
-
-        print(article["title"])
-        print(article["url"])
-        print("-" * 40)
+        print("=" * 50)
+        print(result["title"])
+        print(result["type"])
+        print(result["end_time"])
+        print(result["url"])
 
 
 if __name__ == "__main__":
