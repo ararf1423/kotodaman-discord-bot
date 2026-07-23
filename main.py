@@ -1,22 +1,24 @@
 from scraper import get_news_list
 from parser import parse_article
 from notifier import send_discord
+from storage import load_events, save_events
 from config import EVENT_WEBHOOK, GACHA_WEBHOOK
 
 
 def main():
+    sent = load_events()
     news = get_news_list()
 
     for article in news[:5]:
+
+        if article["url"] in sent:
+            continue
+
         result = parse_article(article)
 
         print("=" * 50)
         print(result["title"])
-        print(result["type"])
-        print(result["end_time"])
-        print(result["url"])
 
-        # イベント
         if result["type"] == "event" and EVENT_WEBHOOK:
             send_discord(
                 EVENT_WEBHOOK,
@@ -24,13 +26,16 @@ def main():
                 result["url"]
             )
 
-        # ガチャ
         elif result["type"] == "gacha" and GACHA_WEBHOOK:
             send_discord(
                 GACHA_WEBHOOK,
                 result["title"],
                 result["url"]
             )
+
+        sent.append(article["url"])
+
+    save_events(sent)
 
 
 if __name__ == "__main__":
