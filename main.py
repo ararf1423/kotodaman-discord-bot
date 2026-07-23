@@ -20,7 +20,7 @@ def main():
 
     print(f"取得記事数: {len(news)}")
 
-    now = datetime.now()
+    now = datetime.now() + timedelta(hours=9)
 
     print(f"現在時刻: {now}")
 
