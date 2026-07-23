@@ -24,7 +24,8 @@ def main():
                 EVENT_WEBHOOK,
                 result["title"],
                 result["url"],
-                result["end_time"]
+                result["end_time"],
+                result["image"]
             )
 
         elif result["type"] == "gacha" and GACHA_WEBHOOK:
@@ -32,7 +33,8 @@ def main():
                 GACHA_WEBHOOK,
                 result["title"],
                 result["url"],
-                result["end_time"]
+                result["end_time"],
+                result["image"]
             )
 
         sent.append(article["url"])
