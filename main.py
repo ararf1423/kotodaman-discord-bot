@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from scraper import get_news_list
 from parser import parse_article
 from notifier import send_discord
@@ -6,38 +8,48 @@ from config import EVENT_WEBHOOK, GACHA_WEBHOOK
 
 
 def main():
+
     sent = load_events()
+
     news = get_news_list()
 
-    for article in news[:5]:
+    now = datetime.now()
 
-        if article["url"] in sent:
-            continue
+    for article in news:
 
         result = parse_article(article)
 
-        print("=" * 50)
-        print(result["title"])
+        if result["end_time"] is None:
+            continue
 
-        if result["type"] == "event" and EVENT_WEBHOOK:
-            send_discord(
-                EVENT_WEBHOOK,
-                result["title"],
-                result["url"],
-                result["end_time"],
-                result["image"]
-            )
+        remain = result["end_time"] - now
 
-        elif result["type"] == "gacha" and GACHA_WEBHOOK:
-            send_discord(
-                GACHA_WEBHOOK,
-                result["title"],
-                result["url"],
-                result["end_time"],
-                result["image"]
-            )
+        if timedelta(hours=23) <= remain <= timedelta(hours=24):
 
-        sent.append(article["url"])
+            if sent.get(article["url"]):
+                continue
+
+            if result["type"] == "event":
+
+                send_discord(
+                    EVENT_WEBHOOK,
+                    "⏰終了まで24時間",
+                    result["url"],
+                    result["end_time"],
+                    result["image"]
+                )
+
+            else:
+
+                send_discord(
+                    GACHA_WEBHOOK,
+                    "🎲ガチャ終了まで24時間",
+                    result["url"],
+                    result["end_time"],
+                    result["image"]
+                )
+
+            sent[article["url"]] = True
 
     save_events(sent)
 
