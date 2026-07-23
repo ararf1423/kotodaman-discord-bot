@@ -22,5 +22,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Bot
+        env:
+          EVENT_WEBHOOK_URL: ${{ secrets.EVENT_WEBHOOK_URL }}
+          GACHA_WEBHOOK_URL: ${{ secrets.GACHA_WEBHOOK_URL }}
         run: |
           python main.py
