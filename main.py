@@ -83,7 +83,8 @@ def main():
 
 
             sent[article["url"]] = True
-
+            print("保存するデータ:")
+            print(sent)
         else:
             print("通知対象外")
 
