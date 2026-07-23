@@ -23,14 +23,16 @@ def main():
             send_discord(
                 EVENT_WEBHOOK,
                 result["title"],
-                result["url"]
+                result["url"],
+                result["end_time"]
             )
 
         elif result["type"] == "gacha" and GACHA_WEBHOOK:
             send_discord(
                 GACHA_WEBHOOK,
                 result["title"],
-                result["url"]
+                result["url"],
+                result["end_time"]
             )
 
         sent.append(article["url"])
