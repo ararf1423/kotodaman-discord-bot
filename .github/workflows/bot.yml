@@ -43,3 +43,7 @@ jobs:
           git commit -m "Update events.json" || exit 0
 
           git push
+      
+      - name: Test Save Step
+        run: |
+          echo "Save step reached"
