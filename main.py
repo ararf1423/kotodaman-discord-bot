@@ -88,6 +88,8 @@ def main():
         else:
             print("通知対象外")
 
+    print("save_events直前:")
+    print(sent)
 
     save_events(sent)
 
