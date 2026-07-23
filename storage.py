@@ -1,12 +1,13 @@
 import json
 import os
 
+
 FILE_NAME = "events.json"
 
 
 def load_events():
     if not os.path.exists(FILE_NAME):
-        return []
+        return {}
 
     with open(FILE_NAME, "r", encoding="utf-8") as f:
         return json.load(f)
