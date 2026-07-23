@@ -1,7 +1,8 @@
 import requests
 
 
-def send_discord(webhook_url, title, url, end_time=None):
+def send_discord(webhook_url, title, url, end_time=None, image=None):
+
     description = ""
 
     if end_time:
@@ -15,6 +16,11 @@ def send_discord(webhook_url, title, url, end_time=None):
         "url": url,
         "color": 0x00B0F4
     }
+
+    if image:
+        embed["image"] = {
+            "url": image
+        }
 
     response = requests.post(
         webhook_url,
