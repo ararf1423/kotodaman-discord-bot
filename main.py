@@ -47,7 +47,7 @@ def main():
 
 
         # 23時間〜25時間以内を通知対象
-        if timedelta(days=0) <= remain <= timedelta(days=30):
+        if timedelta(hours=23) <= remain <= timedelta(hours=25):
 
             print("✅ 通知対象")
 
