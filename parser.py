@@ -10,6 +10,30 @@ DATE_PATTERNS = [
 ]
 
 
+def find_last_datetime(text):
+    dates = []
+
+    for pattern in DATE_PATTERNS:
+        for m in re.finditer(pattern, text):
+            try:
+                dates.append(
+                    datetime(
+                        int(m.group(1)),
+                        int(m.group(2)),
+                        int(m.group(3)),
+                        int(m.group(4)),
+                        int(m.group(5))
+                    )
+                )
+            except ValueError:
+                pass
+
+    if dates:
+        return max(dates)
+
+    return None
+
+
 def parse_article(article):
 
     soup = get_article(article["url"])
@@ -21,21 +45,10 @@ def parse_article(article):
     if "召喚" in text or "ガチャ" in text:
         event_type = "gacha"
 
-    end_time = None
+    # 一番最後の日付を終了日時として取得
+    end_time = find_last_datetime(text)
 
-    for pattern in DATE_PATTERNS:
-        m = re.search(pattern, text)
-
-        if m:
-            end_time = datetime(
-                int(m.group(1)),
-                int(m.group(2)),
-                int(m.group(3)),
-                int(m.group(4)),
-                int(m.group(5))
-            )
-            break
-
+    # OGP画像取得
     image = None
 
     og = soup.find("meta", property="og:image")
