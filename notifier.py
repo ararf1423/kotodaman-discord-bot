@@ -1,9 +1,17 @@
 import requests
 
 
-def send_discord(webhook_url, title, url):
+def send_discord(webhook_url, title, url, end_time=None):
+    description = ""
+
+    if end_time:
+        description += f"⏰ **終了日時**\n{end_time.strftime('%Y/%m/%d %H:%M')}\n\n"
+
+    description += f"🔗 {url}"
+
     embed = {
         "title": title,
+        "description": description,
         "url": url,
         "color": 0x00B0F4
     }
