@@ -10,22 +10,56 @@ DATE_PATTERNS = [
 ]
 
 
-def find_last_datetime(text):
+def to_datetime(match):
+    return datetime(
+        int(match.group(1)),
+        int(match.group(2)),
+        int(match.group(3)),
+        int(match.group(4)),
+        int(match.group(5))
+    )
+
+
+def find_end_datetime(text):
+    """
+    終了日時をできるだけ正確に取得する
+    """
+
+    priority_keywords = [
+        "終了",
+        "終了日時",
+        "終了予定",
+        "開催期間",
+        "開催日時",
+        "まで",
+        "15:59",
+        "23:59"
+    ]
+
+    # キーワード付近の日付を優先
+    for keyword in priority_keywords:
+
+        pos = text.find(keyword)
+
+        if pos == -1:
+            continue
+
+        target = text[pos:pos + 400]
+
+        for pattern in DATE_PATTERNS:
+            m = re.search(pattern, target)
+
+            if m:
+                return to_datetime(m)
+
+    # 見つからなければ最後の日付
     dates = []
 
     for pattern in DATE_PATTERNS:
         for m in re.finditer(pattern, text):
             try:
-                dates.append(
-                    datetime(
-                        int(m.group(1)),
-                        int(m.group(2)),
-                        int(m.group(3)),
-                        int(m.group(4)),
-                        int(m.group(5))
-                    )
-                )
-            except ValueError:
+                dates.append(to_datetime(m))
+            except:
                 pass
 
     if dates:
@@ -45,10 +79,8 @@ def parse_article(article):
     if "召喚" in text or "ガチャ" in text:
         event_type = "gacha"
 
-    # 一番最後の日付を終了日時として取得
-    end_time = find_last_datetime(text)
+    end_time = find_end_datetime(text)
 
-    # OGP画像取得
     image = None
 
     og = soup.find("meta", property="og:image")
