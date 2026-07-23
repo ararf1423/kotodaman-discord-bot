@@ -8,10 +8,13 @@ def send_discord(webhook_url, title, url):
         "color": 0x00B0F4
     }
 
-    requests.post(
+    response = requests.post(
         webhook_url,
         json={
             "embeds": [embed]
         },
         timeout=20
     )
+
+    print(f"Discord Status: {response.status_code}")
+    print(response.text)
