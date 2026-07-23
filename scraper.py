@@ -1,55 +1,42 @@
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
 
-from config import NEWS_URL, BASE_URL, USER_AGENT
+from config import NEWS_URL, USER_AGENT
 
 
 def get_news_list():
-    response = requests.get(
-        NEWS_URL,
-        headers=USER_AGENT,
-        timeout=30
-    )
-    response.raise_for_status()
+    response = requests.get(NEWS_URL, headers=USER_AGENT)
 
-    soup = BeautifulSoup(response.text, "lxml")
+    # 文字化け対策
+    response.encoding = response.apparent_encoding
 
-    articles = []
-    seen = set()
+    soup = BeautifulSoup(response.text, "html.parser")
 
-    for a in soup.find_all("a", href=True):
-        href = a.get("href", "")
+    news = []
 
-        if "/info/detail/" not in href:
-            continue
-
-        url = urljoin(BASE_URL, href)
-
-        if url in seen:
-            continue
-
-        seen.add(url)
-
-        title = a.get_text(" ", strip=True)
+    for a in soup.select("a[href*='/info/detail/']"):
+        title = a.get_text(strip=True)
 
         if not title:
             continue
 
-        articles.append({
+        url = a["href"]
+
+        if not url.startswith("http"):
+            url = "https://kotodaman.jp" + url
+
+        news.append({
             "title": title,
             "url": url
         })
 
-    return articles
+    return news
 
 
 def get_article(url):
-    response = requests.get(
-        url,
-        headers=USER_AGENT,
-        timeout=30
-    )
-    response.raise_for_status()
+    response = requests.get(url, headers=USER_AGENT)
 
-    return BeautifulSoup(response.text, "lxml")
+    # ここも文字化け対策
+    response.encoding = response.apparent_encoding
+
+    return BeautifulSoup(response.text, "html.parser")
