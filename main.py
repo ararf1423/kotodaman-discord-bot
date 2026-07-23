@@ -24,16 +24,20 @@ def main():
 
     print(f"現在時刻: {now}")
 
+
     for article in news:
 
         print("\n" + "=" * 50)
+
         print("記事:", article["title"])
         print("URL:", article["url"])
+
 
         result = parse_article(article)
 
         print("種類:", result["type"])
         print("終了日時:", result["end_time"])
+
 
         if result["end_time"] is None:
             print("終了日時なし → スキップ")
@@ -42,58 +46,88 @@ def main():
 
         remain = result["end_time"] - now
 
+
         print("残り時間:", remain)
         print("残り時間(秒):", remain.total_seconds())
 
 
-        # 23時間〜25時間以内を通知対象
         if timedelta(hours=23) <= remain <= timedelta(hours=25):
 
             print("✅ 通知対象")
 
-            if sent.get(article["url"]):
+
+            url = article["url"]
+
+
+            if sent.get(url):
+
                 print("⚠️ すでに通知済み → スキップ")
                 continue
 
 
-            if result["type"] == "event":
 
-                print("イベント通知送信")
+            try:
 
-                send_discord(
-                    EVENT_WEBHOOK,
-                    result["title"],
-                    result["url"],
-                    result["end_time"],
-                    result["image"]
-                )
+                if result["type"] == "event":
 
+                    print("イベント通知送信")
 
-            elif result["type"] == "gacha":
-
-                print("ガチャ通知送信")
-
-                send_discord(
-                    GACHA_WEBHOOK,
-                    result["title"],
-                    result["url"],
-                    result["end_time"],
-                    result["image"]
-                )
+                    send_discord(
+                        EVENT_WEBHOOK,
+                        result["title"],
+                        result["url"],
+                        result["end_time"],
+                        result["image"]
+                    )
 
 
-            sent[article["url"]] = True
-            print("保存するデータ:")
-            print(sent)
+                elif result["type"] == "gacha":
+
+                    print("ガチャ通知送信")
+
+                    send_discord(
+                        GACHA_WEBHOOK,
+                        result["title"],
+                        result["url"],
+                        result["end_time"],
+                        result["image"]
+                    )
+
+
+                # ★ここで即保存
+                sent[url] = True
+
+
+                print("追加後データ:")
+                print(sent)
+
+
+                save_events(sent)
+
+
+                print("✅ events.json保存完了")
+
+
+            except Exception as e:
+
+                print("❌ 通知処理エラー")
+                print(e)
+
+
         else:
+
             print("通知対象外")
 
-    print("save_events直前:")
+
+    print("\n最終保存データ:")
     print(sent)
+
 
     save_events(sent)
 
+
     print("\n===== Bot Finish =====")
+
 
 
 if __name__ == "__main__":
