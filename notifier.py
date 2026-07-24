@@ -19,11 +19,11 @@ def get_webhook(category: str):
     if category == "gacha":
         return GACHA_WEBHOOK_URL
 
-    if category == "maintenance":
-        return MAINTENANCE_WEBHOOK_URL
-
     if category == "notice":
         return NOTICE_WEBHOOK_URL
+
+    if category == "maintenance":
+        return MAINTENANCE_WEBHOOK_URL
 
     return EVENT_WEBHOOK_URL
 
@@ -34,11 +34,11 @@ def get_color(category: str):
     if category == "gacha":
         return COLOR_GACHA
 
-    if category == "maintenance":
-        return COLOR_MAINTENANCE
-
     if category == "notice":
         return COLOR_NOTICE
+
+    if category == "maintenance":
+        return COLOR_MAINTENANCE
 
     return COLOR_EVENT
 
@@ -52,16 +52,12 @@ def send_discord(
     image=None,
     end_time=None,
     everyone=False,
-    footer="コトダマン公式",
 ):
     webhook = get_webhook(category)
 
     if not webhook:
         print(f"[Discord] Webhook未設定 ({category})")
-        return
-
-    if end_time:
-        description += f"\n\n⏰ **終了日時**\n{end_time}"
+        return False
 
     embed = {
         "title": title,
@@ -69,7 +65,7 @@ def send_discord(
         "description": description,
         "color": get_color(category),
         "footer": {
-            "text": footer
+            "text": "コトダマン公式"
         }
     }
 
@@ -78,6 +74,15 @@ def send_discord(
             "url": image
         }
 
+    if end_time:
+        embed["fields"] = [
+            {
+                "name": "⏰ 終了日時",
+                "value": str(end_time),
+                "inline": False,
+            }
+        ]
+
     payload = {
         "embeds": [embed]
     }
@@ -85,11 +90,28 @@ def send_discord(
     if everyone and MENTION_EVERYONE:
         payload["content"] = "@everyone"
 
-    r = requests.post(webhook, json=payload)
+    try:
 
-    if r.status_code in (200, 204):
-        print(f"[Discord] 通知成功 : {title}")
+        response = requests.post(
+            webhook,
+            json=payload,
+            timeout=20,
+        )
 
-    else:
-        print(f"[Discord] 通知失敗 {r.status_code}")
-        print(r.text)
+        if response.status_code in (200, 204):
+
+            print(f"[Discord] 通知成功 : {title}")
+
+            return True
+
+        print(f"[Discord] エラー {response.status_code}")
+        print(response.text)
+
+        return False
+
+    except Exception as e:
+
+        print("[Discord] 通信エラー")
+        print(e)
+
+        return False
