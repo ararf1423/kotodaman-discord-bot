@@ -123,7 +123,7 @@ def main():
         description += (
             f"🔗 {result['url']}"
         )
-                send_discord(
+        send_discord(
             title="⏰ あと24時間で終了！",
             url=result["url"],
             category=result["type"],
