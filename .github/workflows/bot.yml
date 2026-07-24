@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: "0 * * * *"
+    - cron: "*/10 * * * *"
 
 permissions:
   contents: write
@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install packages
+      - name: Install Packages
         run: |
           pip install -r requirements.txt
 
@@ -30,20 +30,18 @@ jobs:
         env:
           EVENT_WEBHOOK_URL: ${{ secrets.EVENT_WEBHOOK_URL }}
           GACHA_WEBHOOK_URL: ${{ secrets.GACHA_WEBHOOK_URL }}
+          NOTICE_WEBHOOK_URL: ${{ secrets.NOTICE_WEBHOOK_URL }}
+          MAINTENANCE_WEBHOOK_URL: ${{ secrets.MAINTENANCE_WEBHOOK_URL }}
         run: |
           python main.py
 
-      - name: Save events.json
+      - name: Commit JSON
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
-          git add events.json
+          git add events.json seen_news.json
 
-          git commit -m "Update events.json" || exit 0
+          git diff --cached --quiet || git commit -m "Update notify cache"
 
           git push
-      
-      - name: Test Save Step
-        run: |
-          echo "Save step reached"
